@@ -1,5 +1,5 @@
 # GAS--get_CWB_img
-![](https://i.imgur.com/WStZIAR.png)
+![](https://i.imgur.com/lNY6DGK.png)
 
 ## DOMO
 https://drive.google.com/file/d/1qiVho8YutXV1Y_JnK0ff1tUMfTNst_Jy/view?usp=sharing
