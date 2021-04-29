@@ -1,12 +1,18 @@
-const outermostfolderId = ""; // 最外面資料夾ID 如: 2021年天氣學
-const sheetId = ""; //google excel id
-const dayArray = [20210417,20210418,20210419,20210420,20210421,20210422,20210423] // 你要創的日期 2021年天氣學 > 20210324 ...
+//  注意!!! runThisCodeToCreateFolders只能跑一次，如果要再次執行請先把excel清空 或 跑完後把excel內重複的title清空(日期之類的 你跑跑看就知道)
+const outermostfolderId = "1aAhOyCI-QX7Y6devs0y2JOJ-bvhqRBQh"; // 最外面資料夾ID 如: 2021年天氣學
+const sheetId = "16RLhAgP52SeBWzrXcmAoZwe8CcumMVpfgveohrbGLmc"; //google excel id
+const dayArray = [20210429] // 你要創的日期 2021年天氣學 > 20210324 ...
 
 const cwbStationID = [ '46692', '46699', '46734', '46750', '46810' ,'46780']; // 可新增/移除測站
 
 const timeMachine = 0; // 輸入數字(若數字>0，則為退回 timeMachine 小時) // 讓程式把時間退回幾小時前，避免有時段的圖沒抓到 (PS 抓圖一樣是一次抓 6hr 的喔!)
 
+// 資料夾 (希望別改名 不然後面也要改。應該可刪，但像 part2_1()之類的 有細項被刪的就要改一下，不要執行到被刪除的細項)
+const imgParams = ['雷達-台灣周邊','雷達-全範圍','衛星雲圖-可見光_台灣','衛星雲圖-可見光_亞洲','衛星雲圖-色調強化_台灣','衛星雲圖-色調強化_亞洲','衛星雲圖-真實色_台灣','衛星雲圖-真實色_亞洲','氣溫','小時累積雨量','日累積雨量','探空','JMA天氣圖','NCDR風場']
 // ---------------------------------------------- 下面超醜 不用管
+const today = new Date(Date.now()-timeMachine*60*60*1000);
+const yesterday = new Date(Date.now()-(24+timeMachine)*60*60*1000)
+
 function runThisCodeToCreateFolders(){
   inputTitleToExcel()
   dayArray.forEach(eachDay=>{
@@ -21,13 +27,13 @@ function part1(){
 
 // 因為執行起來有機會超過6min，所以改加個參數選擇你要跑的細項
 function part2_1() {
-  img('衛星雲圖','CWB',['可見光_台灣','可見光_亞洲']);
+  img('衛星雲圖','CWB',['衛星雲圖-可見光_台灣','衛星雲圖-可見光_亞洲']);
 }
 function part2_2() {
-  img('衛星雲圖','CWB',['色調強化_台灣','色調強化_亞洲']);
+  img('衛星雲圖','CWB',['衛星雲圖-色調強化_台灣','衛星雲圖-色調強化_亞洲']);
 }
 function part2_3() {
-  img('衛星雲圖','CWB',['真實色_亞洲','真實色_台灣']);
+  img('衛星雲圖','CWB',['衛星雲圖-真實色_台灣','衛星雲圖-真實色_亞洲']);
 }
 
 function part3(){
@@ -76,8 +82,6 @@ function start(NEW_FOLDER_NAME,parentFolderId){
 };
 
 // ---------------------------------------------------------------------
-const imgParams = ['雷達-台灣周邊','雷達-全範圍','衛星雲圖-可見光_台灣','衛星雲圖-可見光_亞洲','衛星雲圖-色調強化_台灣','衛星雲圖-色調強化_亞洲','衛星雲圖-真實色_台灣','衛星雲圖-真實色_亞洲','氣溫','小時累積雨量','日累積雨量','探空','JMA天氣圖','NCDR風場']
-
 function inputTitleToExcel(){
   // // 初始化試算表
   let SpreadSheet = SpreadsheetApp.openById(sheetId);
@@ -120,22 +124,10 @@ function getExcelData(e) {
   
   for(i in data){
     if(data[i][0] != ""){
-    dataExportId[data[i][0]] = {
-      '台灣周邊':   data[i][1],
-      '全範圍':   data[i][2],
-      '可見光_台灣':  data[i][3],
-      '可見光_亞洲':   data[i][4],
-      '色調強化_台灣':   data[i][5],
-      '色調強化_亞洲':  data[i][6],
-      '真實色_台灣':   data[i][7],
-      '真實色_亞洲':   data[i][8],
-      '氣溫':  data[i][9],
-      '小時累積雨量':   data[i][10],
-      '日累積雨量':  data[i][11],
-      '探空':  data[i][12],
-      'JMA天氣圖':   data[i][13],
-      'NCDR風場':  data[i][14]
-      }
+      dataExportId[data[i][0]] = {}
+      imgParams.forEach((params,index)=>{
+          dataExportId[data[i][0]][params] = data[i][index+1]
+      })
     }
   }
   return dataExportId;
@@ -188,10 +180,10 @@ function imgFactory(property) {
   this.imgProperty = {
     雷達: {
       category: {
-        台灣周邊: {
+        '雷達-台灣周邊': {
           img_url: "https://www.cwb.gov.tw/Data/radar/CV1_TW_3600_"
         },
-        全範圍: {
+        '雷達-全範圍': {
           img_url: "https://www.cwb.gov.tw/Data/radar/CV1_3600_"
         }
       },
@@ -202,30 +194,30 @@ function imgFactory(property) {
 
     衛星雲圖: {
       category: {
-        色調強化_台灣: {
+        '衛星雲圖-色調強化_台灣': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/TWI_IR1_MB_800/TWI_IR1_MB_800-"
         },
 
-        色調強化_亞洲: {
+        '衛星雲圖-色調強化_亞洲': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/LCC_IR1_MB_2750/LCC_IR1_MB_2750-"
         },
-        可見光_台灣: {
+        '衛星雲圖-可見光_台灣': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/TWI_VIS_Gray_1350/TWI_VIS_Gray_1350-"
         },
 
-        可見光_亞洲: {
+        '衛星雲圖-可見光_亞洲': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/LCC_VIS_Gray_2750/LCC_VIS_Gray_2750-"
         },
-        真實色_台灣: {
+        '衛星雲圖-真實色_台灣': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/TWI_VIS_TRGB_1375/TWI_VIS_TRGB_1375-"
         },
 
-        真實色_亞洲: {
+        '衛星雲圖-真實色_亞洲': {
           img_url:
             "https://www.cwb.gov.tw/Data/satellite/LCC_VIS_TRGB_2750/LCC_VIS_TRGB_2750-"
         }
@@ -280,8 +272,6 @@ function imgFactory(property) {
 }
 
 imgFactory.prototype.timeInterval = function (interval_var){
-  let today = new Date(Date.now()-timeMachine*60*60*1000);
-  let yesterday = new Date(Date.now()-24*60*60*1000)
   let now = Utilities.formatDate(today, "GMT+8", "yyyy-MM-dd HH:mm") // HH 24HR
   let now_hr = Number(Utilities.formatDate(today, "GMT+8", "HH"))
   let now_string = now.split(' ')
@@ -345,10 +335,10 @@ imgFactory.prototype.combitTime = function (start_Hr) {
     switch (timeFormat) {
       case "YYYYMMDD[00-23][0-5]0":
         if( now_hr < 6 ){
-          day = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyyMMdd")
-          folderDay = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyyMMdd")
+          day = Utilities.formatDate(yesterday, "GMT+8", "yyyyMMdd")
+          folderDay = Utilities.formatDate(yesterday, "GMT+8", "yyyyMMdd")
         }else(
-          day = Utilities.formatDate(new Date(), "GMT+8", "yyyyMMdd")
+          day = Utilities.formatDate(today, "GMT+8", "yyyyMMdd")
         )
         
         this.array = hr_min_producer('');
@@ -358,10 +348,10 @@ imgFactory.prototype.combitTime = function (start_Hr) {
         break;
       case "YYYY-MM-DD-[00-23]-[0-5]0":
         if( now_hr < 6 ){
-          day = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyy-MM-dd")
-          folderDay = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyyMMdd")
+          day = Utilities.formatDate(yesterday, "GMT+8", "yyyy-MM-dd")
+          folderDay = Utilities.formatDate(yesterday, "GMT+8", "yyyyMMdd")
         }else(
-          day = Utilities.formatDate(new Date(), "GMT+8", "yyyy-MM-dd")
+          day = Utilities.formatDate(today, "GMT+8", "yyyy-MM-dd")
         )
         this.array = hr_min_producer('-');
         this.array.forEach((value, index, array)=>{
@@ -370,10 +360,10 @@ imgFactory.prototype.combitTime = function (start_Hr) {
       break;
       case "YYYY-MM-DD_[00-23]00":
         if( now_hr < 6 ){
-          day = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyy-MM-dd")
-          folderDay = Utilities.formatDate(new Date(Date.now()-24*60*60*1000), "GMT+8", "yyyyMMdd")
+          day = Utilities.formatDate(yesterday, "GMT+8", "yyyy-MM-dd")
+          folderDay = Utilities.formatDate(yesterday, "GMT+8", "yyyyMMdd")
         }else(
-          day = Utilities.formatDate(new Date(), "GMT+8", "yyyy-MM-dd")
+          day = Utilities.formatDate(today, "GMT+8", "yyyy-MM-dd")
         )
         this.array = hr_min_producer('');
         this.array.forEach((value, index, array)=>{
@@ -381,7 +371,7 @@ imgFactory.prototype.combitTime = function (start_Hr) {
         })
       break;
       case "YYYY-MM-DD_0000":
-        day = Utilities.formatDate(new Date(), "GMT+8", "yyyy-MM-dd")
+        day = Utilities.formatDate(today, "GMT+8", "yyyy-MM-dd")
         this.array = [`${day}_0000`]
 
       break;
@@ -398,6 +388,7 @@ function img (variable, web='CWB',specialSelectArray){
   var getCategoryObj = imgType.imgProperty[imgType.propertyWantToDraw].category;
   var getCategoryObjList = specialSelectArray? specialSelectArray : Object.keys(getCategoryObj);
   getCategoryObjList.forEach((j)=>{
+
     let url = getCategoryObj[j].img_url
     let imgFormat = imgType.imgProperty[imgType.propertyWantToDraw].imgFormat
     
